@@ -1,8 +1,5 @@
 import sys
-import time
-import numpy as np
 import random
-import math
 from PyQt5.QtWidgets import QPushButton
 
 from matplotlib.backends.qt_compat import QtCore, QtWidgets
@@ -13,13 +10,6 @@ else:
     from matplotlib.backends.backend_qt4agg import (
         FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
 from matplotlib.figure import Figure
-
-@QtCore.Slot()
-def say_hello():
-    print("Button clicked, Hello!")
-
-
-
 
 class ApplicationWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -32,35 +22,35 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         layout.addWidget(static_canvas)
         self.addToolBar(NavigationToolbar(static_canvas, self)) 
 
+        # plot the vertices
         self._static_ax = static_canvas.figure.subplots()
         self._static_ax.plot(0, 0, ".", color="black")
         self._static_ax.plot(10, 0, ".", color="black")
         self._static_ax.plot(5, 5, ".", color="black")
-        self.points = self._static_ax.plot(4, 3, ".", color="green")
 
+        # plot the starting point, doesn't really matter where
+        self.points = self._static_ax.plot(4, 3, ".", color="green")
         self.x = 4.0
         self.y = 3.0
 
+        # buttons and connections for plotting points
         button1 = QPushButton("Plot point")
         button2 = QPushButton("Plot 100 points")
         button1.clicked.connect(self.plot_point)
         button2.clicked.connect(self.plot_one_hundred_points)
-        
         layout.addWidget(button1)
         layout.addWidget(button2)
+        
+        # connect event for moving trace point
         self._static_ax.figure.canvas.mpl_connect('button_press_event', self.button_press_event)
 
-    def _update_canvas(self):
-        t = np.linspace(0, 10, 101)
-        # Shift the sinusoid as a function of time.
-        self._line.set_data(t, np.sin(t + time.time()))
-        self._line.figure.canvas.draw()
-
+    # calculates the midpoint from tracepoint to another point
     def find_midpoint(self, x2, y2) -> tuple[float, float]:
         x = (self.x+x2)/2
         y = (self.y+y2)/2
         return x, y
 
+    # event for moving tracepoint
     def button_press_event(self, event):
         self.x = event.xdata
         self.y = event.ydata
@@ -68,6 +58,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.points = self._static_ax.plot(self.x, self.y, ".", color="green")
         self._static_ax.figure.canvas.draw()
     
+    # event for plotting point
     @QtCore.Slot()
     def plot_point(self):
         print(f"start: ({self.x}, {self.y})")
@@ -86,7 +77,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self._static_ax.figure.canvas.draw()
         print(self.x, self.y)
 
-    
+    # event for plotting 100 points    
     @QtCore.Slot()
     def plot_one_hundred_points(self):
         for i in range(100):
