@@ -36,7 +36,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self._static_ax.plot(0, 0, ".", color="black")
         self._static_ax.plot(10, 0, ".", color="black")
         self._static_ax.plot(5, 5, ".", color="black")
-        self._static_ax.plot(4, 3, ".", color="red")
+        self.points = self._static_ax.plot(4, 3, ".", color="green")
 
         self.x = 4.0
         self.y = 3.0
@@ -48,6 +48,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         
         layout.addWidget(button1)
         layout.addWidget(button2)
+        self._static_ax.figure.canvas.mpl_connect('button_press_event', self.button_press_event)
 
     def _update_canvas(self):
         t = np.linspace(0, 10, 101)
@@ -59,6 +60,13 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         x = (self.x+x2)/2
         y = (self.y+y2)/2
         return x, y
+
+    def button_press_event(self, event):
+        self.x = event.xdata
+        self.y = event.ydata
+        self.points[0].remove()
+        self.points = self._static_ax.plot(self.x, self.y, ".", color="green")
+        self._static_ax.figure.canvas.draw()
     
     @QtCore.Slot()
     def plot_point(self):
@@ -73,8 +81,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         else:
             print("vertice (10, 0)")
             self.x, self.y = self.find_midpoint(10.0, 0.0)
-        
-        self._static_ax.plot(self.x, self.y, ".", color="red")
+        self.points[0].set_color("red")
+        self.points = self._static_ax.plot(self.x, self.y, ".", color="green")
         self._static_ax.figure.canvas.draw()
         print(self.x, self.y)
 
